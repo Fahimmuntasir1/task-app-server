@@ -10,8 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 //mongoDB
-const uri =
-  "mongodb+srv://fahim:85D8NzAmBavQyJLr@cluster0.oaexq.mongodb.net/?retryWrites=true&w=majority";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.oaexq.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -28,26 +27,26 @@ async function run() {
       console.log(data);
       const result = await taskCollection.insertOne(data);
       res.send(result);
-
-      // get tasks
-      app.get("/tasks", async (req, res) => {
-        const query = {};
-        const cursor = taskCollection.find(query);
-        const tools = await cursor.toArray();
-        res.send(tools);
-      });
     });
 
-    // update tasks and 
+    // get tasks
+    app.get("/tasks", async (req, res) => {
+      const query = {};
+      const cursor = taskCollection.find(query);
+      const tools = await cursor.toArray();
+      res.send(tools);
+    });
+
+    // update tasks and
     app.put("/upToDo/:id", async (req, res) => {
       const id = req.params.id;
       const todo = req.body;
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
       const updateDoc = {
-          $set: {
-              data: todo.updateTodo
-          },
+        $set: {
+          data: todo.updateTodo,
+        },
       };
       const Todo = await taskCollection.updateOne(filter, updateDoc, options);
       res.send({ success: true, data: Todo });
